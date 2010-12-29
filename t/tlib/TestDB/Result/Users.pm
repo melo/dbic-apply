@@ -35,5 +35,9 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key('user_id');
 __PACKAGE__->add_unique_constraint(login_un => ['login']);
 
+__PACKAGE__->has_many(
+  emails => 'TestDB::Result::Emails',
+  {'foreign.user_id' => 'self.user_id'}
+);
 
 1;
