@@ -26,7 +26,7 @@ __PACKAGE__->add_columns(
 );
 
 __PACKAGE__->set_primary_key('email_id');
-__PACKAGE__->add_unique_constraint(email_un => ['email']);
+__PACKAGE__->add_unique_constraint(email_per_user_un => ['email', 'user_id']);
 
 __PACKAGE__->belongs_to(
   user => 'TestDB::Result::Users',
