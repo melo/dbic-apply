@@ -43,4 +43,26 @@ CONSTRAINT: for my $name ('primary', keys %constraints) {
   return \%cond;
 }
 
+
+=private __apply_find_one_row
+
+Given a ResultSource and a hashref with fields, returns a single Row if
+a unique row could be found based on the fields present.
+
+Returns undef if no row was found or if the fields provided are
+insuficient to satisfy any of the unique constraints defined on
+the source.
+
+=cut
+
+sub __apply_find_one_row {
+  my ($source) = @_;
+
+  my ($cond, $key) = __apply_find_unique_cond(@_);
+  return unless $cond;
+
+  return $source->resultset->find($cond, {key => $key});
+}
+
+
 1;

@@ -34,4 +34,22 @@ subtest '__apply_find_unique_cond' => sub {
   );
 };
 
+
+subtest '__apply_find_one_row' => sub {
+  my $f     = \&DBICx::Apply::__apply_find_one_row;
+  my $u_src = $db->source('Users');
+  my $u_rs  = $u_src->resultset;
+
+  $u_rs->delete;
+  my $u = $u_rs->create({login => 'mini_me', name => 'Mini Me'});
+
+  my $nu = $f->($u_src, {login => 'mini_me'});
+  ok($nu, 'Found user for login mini_me');
+  is($nu->id, $u->id, '... with the expected ID');
+
+  $nu = $f->($u_src, {login => 'mini_me2'});
+  is($nu, undef, 'No user found for login mini_me2');
+};
+
+
 done_testing();
