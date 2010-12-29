@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 use DBICx::Apply::Tests;
-use DBICx::Apply;
+use DBICx::Apply::Core;
 
 my $db = TestDB->test_db();
 
 subtest '__apply_find_unique_cond' => sub {
-  my $f = \&DBICx::Apply::__apply_find_unique_cond;
+  my $f = \&DBICx::Apply::Core::__apply_find_unique_cond;
 
   my $user_s = $db->source('Users');
   cmp_deeply([$f->($user_s, {})], [], 'No data, no condition found');
@@ -36,7 +36,7 @@ subtest '__apply_find_unique_cond' => sub {
 
 
 subtest '__apply_find_one_row' => sub {
-  my $f     = \&DBICx::Apply::__apply_find_one_row;
+  my $f     = \&DBICx::Apply::Core::__apply_find_one_row;
   my $u_src = $db->source('Users');
   my $u_rs  = $u_src->resultset;
 
