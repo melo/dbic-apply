@@ -10,13 +10,11 @@ use DBICx::Apply::Core;
 ############################################
 # Hook the current DBIC relationship helpers
 
-*__apply_set_relationship_info = \&DBICx::Apply::Core::__apply_set_relationship_info;
-
 sub has_one {
   my ($self, $name, @rest) = @_;
 
-  $self->__apply_set_relationship_info(
-    $name,
+  DBICx::Apply::Core::set_relationship_info(
+    $self, $name,
     { our_role => 'master',
       min_card => 1,
       max_card => 1,
@@ -29,8 +27,8 @@ sub has_one {
 sub belongs_to {
   my ($self, $name, @rest) = @_;
 
-  $self->__apply_set_relationship_info(
-    $name,
+  DBICx::Apply::Core::set_relationship_info(
+    $self, $name,
     { our_role => 'slave',
       min_card => 0,
       max_card => 1,
@@ -43,8 +41,8 @@ sub belongs_to {
 sub might_have {
   my ($self, $name, @rest) = @_;
 
-  $self->__apply_set_relationship_info(
-    $name,
+  DBICx::Apply::Core::set_relationship_info(
+    $self, $name,
     { our_role => 'master',
       min_card => 0,
       max_card => 1,
@@ -57,8 +55,8 @@ sub might_have {
 sub has_many {
   my ($self, $name, @rest) = @_;
 
-  $self->__apply_set_relationship_info(
-    $name,
+  DBICx::Apply::Core::set_relationship_info(
+    $self, $name,
     { our_role => 'master',
       min_card => 0,
       max_card => -1,
@@ -71,8 +69,8 @@ sub has_many {
 sub many_to_many {
   my ($self, $name, $l_rel, $f_rel, @rest) = @_;
 
-  $self->__apply_set_relationship_info(
-    $name,
+  DBICx::Apply::Core::set_relationship_info(
+    $self, $name,
     { our_role      => 'via',
       link_name     => $l_rel,
       link_frg_name => $f_rel,

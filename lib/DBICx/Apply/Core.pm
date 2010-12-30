@@ -7,7 +7,7 @@ use warnings;
 use Scalar::Util 'blessed';
 
 
-=private __apply_find_unique_cond
+=private find_unique_cond
 
 Given a ResultSource and a hashref with fields, searches all the unique
 constraints for one that could be used to find a unique row.
@@ -20,7 +20,7 @@ parameter, and the name of the unique constraint found as the second.
 
 =cut
 
-sub __apply_find_unique_cond {
+sub find_unique_cond {
   my ($source, $data) = @_;
   my %constraints = $source->unique_constraints;
 
@@ -45,7 +45,7 @@ CONSTRAINT: for my $name ('primary', keys %constraints) {
 }
 
 
-=private __apply_find_one_row
+=private find_one_row
 
 Given a ResultSource and a hashref with fields, returns a single Row if
 a unique row could be found based on the fields present.
@@ -56,10 +56,10 @@ the source.
 
 =cut
 
-sub __apply_find_one_row {
+sub find_one_row {
   my ($source) = @_;
 
-  my ($cond, $key) = __apply_find_unique_cond(@_);
+  my ($cond, $key) = find_unique_cond(@_);
   return unless $cond;
 
   return $source->resultset->find($cond, {key => $key});
@@ -69,36 +69,36 @@ sub __apply_find_one_row {
 ##########################################
 # Extended relationship meta-data registry
 
-my %__apply_rel_registry;
+my %rel_registry;
 
-sub __apply_relationships {
+sub relationships {
   my ($source) = @_;
   $source = $source->result_class if blessed($source);
 
-  return keys %{$__apply_rel_registry{$source} || {}};
+  return keys %{$rel_registry{$source} || {}};
 }
 
-sub __apply_relationship_info {
+sub relationship_info {
   my ($source, $name) = @_;
   $source = $source->result_class if blessed($source);
 
-  return unless exists $__apply_rel_registry{$source}{$name};
+  return unless exists $rel_registry{$source}{$name};
 
-  my $meta = $__apply_rel_registry{$source}{$name};
-  __apply_relationship_info_recalc($source, $name, $meta)
+  my $meta = $rel_registry{$source}{$name};
+  relationship_info_recalc($source, $name, $meta)
     if exists $meta->{__need_recalc};
 
   return $meta;
 }
 
-sub __apply_relationship_info_recalc {
+sub relationship_info_recalc {
   my ($source, $name, $meta) = @_;
 
   my $dbic_meta = $source->relationship_info($name);
   $dbic_meta = {} unless $dbic_meta;    ## many-to-many are not rels
 
   ## Add some info to m2m rels
-  $meta->{link_info} = __apply_relationship_info($source, $meta->{link_name})
+  $meta->{link_info} = relationship_info($source, $meta->{link_name})
     if exists $meta->{link_name};
 
   %$meta = (%$meta, %$dbic_meta);
@@ -107,14 +107,14 @@ sub __apply_relationship_info_recalc {
   return;
 }
 
-sub __apply_set_relationship_info {
+sub set_relationship_info {
   my ($source, $name, $info) = @_;
   $source = $source->result_class if blessed($source);
 
   $info->{name} = $name;
   $info->{__need_recalc}++;
 
-  $__apply_rel_registry{$source}{$name} = $info;
+  $rel_registry{$source}{$name} = $info;
 }
 
 

@@ -8,7 +8,7 @@ use DBICx::Apply::Core;
 ## FIXME: need tests for has_one and might_have
 
 my $db   = TestDB->test_db();
-my $info = \&DBICx::Apply::Core::__apply_relationship_info;
+my $info = \&DBICx::Apply::Core::relationship_info;
 
 my $user = $db->source('Users');
 cmp_deeply(
