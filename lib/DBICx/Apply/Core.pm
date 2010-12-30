@@ -5,6 +5,53 @@ package DBICx::Apply::Core;
 use strict;
 use warnings;
 use Scalar::Util 'blessed';
+use Carp;
+
+
+=private parse_data
+
+Given a ResultSource and a data hashref, splits the fields between
+columns, and the three type of relations we need: master, slave and via
+(a special case for many-to-many relationships).
+
+=cut
+
+sub parse_data {
+  my ($source, $data) = @_;
+
+  my %fields;
+  my @slave_rels;
+  my @master_rels;
+  my @via_rels;
+
+  for my $f (keys %$data) {
+    my $v = $data->{$f};
+
+    if ($source->has_column($f)) {
+      $fields{$f} = $v;
+      next;
+    }
+
+    my $info = relationship_info($source, $f);
+    croak("Name '$f' not a field or relationship of '$source'")
+      unless $info;
+
+    my $role = $info->{our_role};
+    if ($role eq 'slave') {
+      push @slave_rels, [$f, $v, $info];
+    }
+    elsif ($role eq 'master') {
+      $v = [$v] unless ref($v) eq 'ARRAY';
+      push @master_rels, [$f, $v, $info];
+    }
+    elsif ($role eq 'via') {
+      $v = [$v] unless ref($v) eq 'ARRAY';
+      push @via_rels, [$f, $v, $info];
+    }
+  }
+
+  return (\%fields, \@slave_rels, \@master_rels, \@via_rels);
+}
 
 
 =private find_unique_cond
@@ -116,7 +163,6 @@ sub set_relationship_info {
 
   $rel_registry{$source}{$name} = $info;
 }
-
 
 
 1;
