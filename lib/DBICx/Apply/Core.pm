@@ -85,9 +85,10 @@ sub __apply_relationship_info {
   return unless exists $__apply_rel_registry{$source}{$name};
 
   my $meta = $__apply_rel_registry{$source}{$name};
-  return $meta unless exists $meta->{__need_recalc};
+  __apply_relationship_info_recalc($source, $name, $meta)
+    if exists $meta->{__need_recalc};
 
-  return __apply_relationship_info_recalc($source, $name, $meta);
+  return $meta;
 }
 
 sub __apply_relationship_info_recalc {
@@ -101,7 +102,7 @@ sub __apply_relationship_info_recalc {
   %$meta = (%$meta, %$dbic_meta);
   delete $meta->{__need_recalc};
 
-  return $meta;
+  return;
 }
 
 sub __apply_set_relationship_info {
