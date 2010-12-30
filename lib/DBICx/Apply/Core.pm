@@ -18,17 +18,13 @@ columns, and the three type of relations we need: master, slave and via
 
 sub parse_data {
   my ($source, $data) = @_;
-
-  my %fields;
-  my @slave_rels;
-  my @master_rels;
-  my @via_rels;
+  my %splited;
 
   for my $f (keys %$data) {
     my $v = $data->{$f};
 
     if ($source->has_column($f)) {
-      $fields{$f} = $v;
+      $splited{fields}{$f} = $v;
       next;
     }
 
@@ -37,20 +33,11 @@ sub parse_data {
       unless $info;
 
     my $role = $info->{our_role};
-    if ($role eq 'slave') {
-      push @slave_rels, [$f, $v, $info];
-    }
-    elsif ($role eq 'master') {
-      $v = [$v] unless ref($v) eq 'ARRAY';
-      push @master_rels, [$f, $v, $info];
-    }
-    elsif ($role eq 'via') {
-      $v = [$v] unless ref($v) eq 'ARRAY';
-      push @via_rels, [$f, $v, $info];
-    }
+    $v = [$v] unless $role eq 'slave' or ref($v) eq 'ARRAY';
+    push @{$splited{$role}}, [$f, $v, $info];
   }
 
-  return (\%fields, \@slave_rels, \@master_rels, \@via_rels);
+  return \%splited;
 }
 
 
