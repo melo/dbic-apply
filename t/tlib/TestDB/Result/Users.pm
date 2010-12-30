@@ -5,6 +5,8 @@ use warnings;
 use base 'DBIx::Class::Core';
 use DateTime;
 
+__PACKAGE__->load_components('+DBICx::Apply');
+
 __PACKAGE__->table('users');
 
 __PACKAGE__->add_columns(

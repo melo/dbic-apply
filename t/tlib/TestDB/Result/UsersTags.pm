@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use base 'DBIx::Class::Core';
 
+__PACKAGE__->load_components('+DBICx::Apply');
+
 __PACKAGE__->table('users_tags');
 
 __PACKAGE__->add_columns(
