@@ -94,10 +94,12 @@ sub __apply_relationship_info {
 sub __apply_relationship_info_recalc {
   my ($source, $name, $meta) = @_;
 
-  my $dbic_meta = $source->relationship_info($name)
-    || {};    ## many-to-many are not rels
-  $meta->{link_rel} = $source->relationship_info($meta->{link_rel_name})
-    if exists $meta->{link_rel_name};
+  my $dbic_meta = $source->relationship_info($name);
+  $dbic_meta = {} unless $dbic_meta;    ## many-to-many are not rels
+
+  ## Add some info to m2m rels
+  $meta->{link_info} = __apply_relationship_info($source, $meta->{link_name})
+    if exists $meta->{link_name};
 
   %$meta = (%$meta, %$dbic_meta);
   delete $meta->{__need_recalc};

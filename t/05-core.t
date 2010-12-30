@@ -87,14 +87,44 @@ subtest 'Relationship Registry' => sub {
         rel2 => {a => 1});
     },
     undef,
-    'Set rel2 for new source with proper relationship_info()'
+    'Set rel2 for source with proper relationship_info()'
   );
 
   cmp_deeply([DBICx::Apply::Core::__apply_relationships($src)],
-    ['rel2'], 'Proper rel2 exception found for our source');
+    ['rel2'], 'Proper rel2 relation found');
   cmp_deeply(
     DBICx::Apply::Core::__apply_relationship_info($src, 'rel2'),
     {a => 1, b => 2, name => 'rel2'},
+    '... and relationship_info returns expected merged info'
+  );
+
+
+  is(
+    exception {
+      DBICx::Apply::Core::__apply_set_relationship_info($src,
+        rel3 => {a => 1, link_name => 'rel2'});
+    },
+    undef,
+    'Set m2m rel3 for source with proper relationship_info()'
+  );
+
+  cmp_deeply(
+    [DBICx::Apply::Core::__apply_relationships($src)],
+    bag('rel2', 'rel3'),
+    'Proper rel2+rel3 relations found'
+  );
+  cmp_deeply(
+    DBICx::Apply::Core::__apply_relationship_info($src, 'rel3'),
+    { a         => 1,
+      b         => 2,
+      name      => 'rel3',
+      link_name => 'rel2',
+      link_info => {
+        a    => 1,
+        b    => 2,
+        name => 'rel2',
+      },
+    },
     '... and relationship_info returns expected merged info'
   );
 };
