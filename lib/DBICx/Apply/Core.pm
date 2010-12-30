@@ -4,6 +4,7 @@ package DBICx::Apply::Core;
 
 use strict;
 use warnings;
+use Scalar::Util 'blessed';
 
 
 =private __apply_find_unique_cond
@@ -63,6 +64,56 @@ sub __apply_find_one_row {
 
   return $source->resultset->find($cond, {key => $key});
 }
+
+
+##########################################
+# Extended relationship meta-data registry
+
+my %__apply_rel_registry;
+
+sub __apply_relationships {
+  my ($source) = @_;
+  $source = $source->result_class if blessed($source);
+
+  return keys %{$__apply_rel_registry{$source} || {}};
+}
+
+sub __apply_relationship_info {
+  my ($source, $name) = @_;
+  $source = $source->result_class if blessed($source);
+
+  return unless exists $__apply_rel_registry{$source}{$name};
+
+  my $meta = $__apply_rel_registry{$source}{$name};
+  return $meta unless exists $meta->{__need_recalc};
+
+  return __apply_relationship_info_recalc($source, $name, $meta);
+}
+
+sub __apply_relationship_info_recalc {
+  my ($source, $name, $meta) = @_;
+
+  my $dbic_meta = $source->relationship_info($name)
+    || {};    ## many-to-many are not rels
+  $meta->{link_rel} = $source->relationship_info($meta->{link_rel_name})
+    if exists $meta->{link_rel_name};
+
+  %$meta = (%$meta, %$dbic_meta);
+  delete $meta->{__need_recalc};
+
+  return $meta;
+}
+
+sub __apply_set_relationship_info {
+  my ($source, $name, $info) = @_;
+  $source = $source->result_class if blessed($source);
+
+  $info->{name} = $name;
+  $info->{__need_recalc}++;
+
+  $__apply_rel_registry{$source}{$name} = $info;
+}
+
 
 
 1;

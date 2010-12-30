@@ -52,4 +52,52 @@ subtest '__apply_find_one_row' => sub {
 };
 
 
+subtest 'Relationship Registry' => sub {
+  require X;
+  my $src = 'X';
+
+  cmp_deeply([DBICx::Apply::Core::__apply_relationships($src)],
+    [], 'No relationships registered by default for source');
+  is(DBICx::Apply::Core::__apply_relationship_info($src, 'rel1'),
+    undef, '... so no relationship_info is undef');
+
+  is(
+    exception {
+      DBICx::Apply::Core::__apply_set_relationship_info($src,
+        rel1 => {a => 1});
+    },
+    undef,
+    'Set rel1 for new source with empty relationship_info()'
+  );
+
+  cmp_deeply([DBICx::Apply::Core::__apply_relationships($src)],
+    ['rel1'], 'We have a relationship now');
+  cmp_deeply(
+    DBICx::Apply::Core::__apply_relationship_info($src, 'rel1'),
+    {a => 1, name => 'rel1'},
+    '... and relationship_info returns expected info'
+  );
+
+  require Y;
+  $src = Y->new;
+
+  is(
+    exception {
+      DBICx::Apply::Core::__apply_set_relationship_info($src,
+        rel2 => {a => 1});
+    },
+    undef,
+    'Set rel2 for new source with proper relationship_info()'
+  );
+
+  cmp_deeply([DBICx::Apply::Core::__apply_relationships($src)],
+    ['rel2'], 'Proper rel2 exception found for our source');
+  cmp_deeply(
+    DBICx::Apply::Core::__apply_relationship_info($src, 'rel2'),
+    {a => 1, b => 2, name => 'rel2'},
+    '... and relationship_info returns expected merged info'
+  );
+};
+
+
 done_testing();
