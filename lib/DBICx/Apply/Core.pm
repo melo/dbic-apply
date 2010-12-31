@@ -7,6 +7,28 @@ use warnings;
 use Scalar::Util 'blessed';
 use Carp;
 
+# DBIx::Class DBIx::Class::ResultSet DBIx::Class::ResultSource
+
+=function apply
+=cut
+
+sub apply {
+  my ($source, $data, $row) = @_;
+
+  my $split = parse_data($source, $data);
+  my $fields = $split->{fields};
+
+  $row = find_one_row($source, $fields) unless $row;
+  if ($row) {
+    $row->update($fields);
+  }
+  else {
+    $row = $source->resultset->create($fields);
+  }
+
+  return $row;
+}
+
 
 =function parse_data
 
