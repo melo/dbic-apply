@@ -2,10 +2,7 @@ package TestDB::Result::Users;
 
 use strict;
 use warnings;
-use base 'DBIx::Class::Core';
-use DateTime;
-
-__PACKAGE__->load_components('+DBICx::Apply');
+use parent 'TestDB::Base::Source';
 
 __PACKAGE__->table('users');
 

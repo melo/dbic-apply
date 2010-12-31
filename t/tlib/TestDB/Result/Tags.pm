@@ -2,9 +2,7 @@ package TestDB::Result::Tags;
 
 use strict;
 use warnings;
-use base 'DBIx::Class::Core';
-
-__PACKAGE__->load_components('+DBICx::Apply');
+use parent 'TestDB::Base::Source';
 
 __PACKAGE__->table('tags');
 
