@@ -57,11 +57,12 @@ sub apply_slave_role_relations {
     ## $frg_keys{__delete__} to make that happen. Still needs more real
     ## world usage before deciding proper behaviour.
     ##
-    ## That would probably work fine. But I don't know yet when to apply
+    ## It would probably work fine. But I don't know yet when to apply
     ## the __delete__. Should we keep doing all slave apply()'s and only
     ## then do the __delete__? And what about relations where we are the
-    ## master? should we do the apply there and only then do the
-    ## __delete__? Not sure.
+    ## master? should we do the apply on all those relations and leave
+    ## the __delete__ on self to the very last? Or even: collect all
+    ## deletes and do them in a single batch at the very end? Not sure.
     $frg_keys{$name} = $data if $data;
   }
 
