@@ -24,6 +24,7 @@ cmp_deeply(
     name     => "emails",
     our_role => "master",
     source   => "TestDB::Result::Emails",
+    from     => "TestDB::Result::Users",
   },
   'Meta for has_many Users => Emails ok'
 );
@@ -40,6 +41,7 @@ cmp_deeply(
     name     => "tags_per_user",
     our_role => "master",
     source   => "TestDB::Result::UsersTags",
+    from     => "TestDB::Result::Users",
   },
   'Meta for has_many Users => UsersTags ok'
 );
@@ -49,6 +51,7 @@ cmp_deeply(
     link_name     => "tags_per_user",
     name          => "tags",
     our_role      => "via",
+    from          => "TestDB::Result::Users",
   },
   'Meta for many_to_many Users => Tags ok'
 );
@@ -66,6 +69,7 @@ cmp_deeply(
     name     => "user",
     our_role => "slave",
     source   => "TestDB::Result::Users",
+    from     => "TestDB::Result::Emails",
   },
   'Meta for belongs_to Emails => Users ok'
 );
@@ -85,6 +89,7 @@ cmp_deeply(
     name     => "users_per_tag",
     our_role => "master",
     source   => "TestDB::Result::UsersTags",
+    from     => "TestDB::Result::Tags",
   },
   'Meta for has_many Tags => UsersTags ok'
 );
@@ -94,6 +99,7 @@ cmp_deeply(
     link_name     => "users_per_tag",
     name          => "users",
     our_role      => "via",
+    from          => "TestDB::Result::Tags",
   },
   'Meta for many_to_many Tags => Users ok'
 );

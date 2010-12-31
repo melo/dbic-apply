@@ -79,7 +79,7 @@ subtest 'Relationship Registry' => sub {
     ['rel1'], 'We have a relationship now');
   cmp_deeply(
     DBICx::Apply::Core::relationship_info($src, 'rel1'),
-    {a => 1, name => 'rel1'},
+    {a => 1, name => 'rel1', from => 'X'},
     '... and relationship_info returns expected info'
   );
 
@@ -98,7 +98,7 @@ subtest 'Relationship Registry' => sub {
     ['rel2'], 'Proper rel2 relation found');
   cmp_deeply(
     DBICx::Apply::Core::relationship_info($src, 'rel2'),
-    {a => 1, b => 2, name => 'rel2'},
+    {a => 1, b => 2, name => 'rel2', from => 'Y'},
     '... and relationship_info returns expected merged info'
   );
 
@@ -123,6 +123,7 @@ subtest 'Relationship Registry' => sub {
       b         => 2,
       name      => 'rel3',
       link_name => 'rel2',
+      from      => 'Y',
     },
     '... and relationship_info returns expected merged info'
   );

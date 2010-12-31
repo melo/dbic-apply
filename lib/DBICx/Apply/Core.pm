@@ -216,6 +216,7 @@ sub set_relationship_info {
   $source = $source->result_class if blessed($source);
 
   $info->{name} = $name;
+  $info->{from} = $source;
   $info->{__need_recalc}++;
 
   $rel_registry{$source}{$name} = $info;
