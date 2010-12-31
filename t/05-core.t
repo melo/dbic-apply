@@ -130,4 +130,26 @@ subtest 'Relationship Registry' => sub {
 };
 
 
+subtest '_collect_cond_fields' => sub {
+  my $ccf = \&DBICx::Apply::Core::_collect_cond_fields;
+
+  cmp_deeply(
+    $ccf->({cond => {'foreign.x' => 'self.z'}}),
+    {z => 'x'},
+    'Single field condition'
+  );
+  cmp_deeply(
+    $ccf->(
+      { cond => {
+          'foreign.x' => 'self.z',
+          'foreign.a' => 'self.b',
+          'foreign.f' => 'self.g',
+        }
+      }
+    ),
+    {z => 'x', b => 'a', g => 'f'},
+    'Multiple field condition'
+  );
+};
+
 done_testing();

@@ -70,6 +70,34 @@ sub apply_slave_role_relations {
 }
 
 
+=private _collect_cond_fields
+
+Extract a hashref with pairs (local field => remote field) based on a
+relationship condition.
+
+=cut
+
+sub _collect_cond_fields {
+  my ($info) = @_;
+
+  return $info->{cond_fields} if $info->{cond_fields};
+
+  ## FIXME: deal with conditions of ArrayRef or other types
+  my $cond = $info->{cond};
+  confess("Unsupported relation $cond->{from} $cond->{name} type $cond, ")
+    unless ref($cond) eq 'HASH';
+
+  my %fields;
+  while (my ($foreign, $self) = each %$cond) {
+    $foreign =~ s/^foreign[.]//;
+    $self    =~ s/^self[.]//;
+    $fields{$self} = $foreign;
+  }
+
+  return $info->{cond_fields} = \%fields;
+}
+
+
 =function parse_data
 
 Given a ResultSource and a data hashref, splits the fields between
