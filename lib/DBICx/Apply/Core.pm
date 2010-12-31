@@ -125,11 +125,11 @@ sub relationships {
 
 sub relationship_info {
   my ($source, $name) = @_;
-  $source = $source->result_class if blessed($source);
+  my $source_class = $source->result_class;
 
-  return unless exists $rel_registry{$source}{$name};
+  return unless exists $rel_registry{$source_class}{$name};
 
-  my $meta = $rel_registry{$source}{$name};
+  my $meta = $rel_registry{$source_class}{$name};
   _relationship_info_recalc($source, $name, $meta)
     if exists $meta->{__need_recalc};
 
