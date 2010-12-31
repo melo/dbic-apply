@@ -18,6 +18,11 @@ sub apply {
   my $split = parse_data($source, $data);
   my $fields = $split->{fields};
 
+  if (my $rels = $split->{slave}) {
+    my $extra_fields = apply_slave_role_relations($source, $rels);
+    $fields = {%$fields, %$extra_fields} if %$extra_fields;
+  }
+
   $row = find_one_row($source, $fields) unless $row;
   if ($row) {
     $row->update($fields);
@@ -27,6 +32,40 @@ sub apply {
   }
 
   return $row;
+}
+
+
+=function apply_slave_role_relations
+=cut
+
+sub apply_slave_role_relations {
+  my ($source, $rels) = @_;
+  my %frg_keys;
+
+  for (@$rels) {
+    my ($name, $data, $info) = @$_;
+
+    $data = apply($source->related_source($name), $data)
+      unless blessed($data);
+
+    ## We use the full object and let DBIC pull the required fields; not
+    ## sure if this is a good idea, but is quicker for now
+    ##
+    ## FIXME: $data will be undef if the apply() above deleted this
+    ## object. In that case, given that this is a slave relation, we
+    ## will be deleted also. We should probably set
+    ## $frg_keys{__delete__} to make that happen. Still needs more real
+    ## world usage before deciding proper behaviour.
+    ##
+    ## That would probably work fine. But I don't know yet when to apply
+    ## the __delete__. Should we keep doing all slave apply()'s and only
+    ## then do the __delete__? And what about relations where we are the
+    ## master? should we do the apply there and only then do the
+    ## __delete__? Not sure.
+    $frg_keys{$name} = $data if $data;
+  }
+
+  return \%frg_keys;
 }
 
 
@@ -129,6 +168,7 @@ sub find_one_row {
   my ($key, $cond) = find_unique_cond(@_);
   return unless $cond;
 
+  ## TODO: with key => $key, does find guarantee a single result?
   return $source->resultset->find($cond, {key => $key});
 }
 
