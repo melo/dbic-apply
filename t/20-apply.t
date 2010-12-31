@@ -6,10 +6,8 @@ use DBICx::Apply::Tests;
 use DBICx::Apply::Core;
 
 
-my $db = TestDB->test_db();
-
-
 subtest 'Simple cases' => sub {
+  my $db = TestDB->test_db();
   my $rs = $db->resultset('Users');
   my $u;
 
