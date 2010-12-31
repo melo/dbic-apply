@@ -13,12 +13,13 @@ my $info = \&DBICx::Apply::Core::relationship_info;
 my $user = $db->source('Users');
 cmp_deeply(
   $info->($user, 'emails'),
-  { attrs => superhashof({
-      accessor       => "multi",
-      cascade_copy   => 1,
-      cascade_delete => 1,
-      join_type      => "LEFT",
-    }),
+  { attrs => superhashof(
+      { accessor       => "multi",
+        cascade_copy   => 1,
+        cascade_delete => 1,
+        join_type      => "LEFT",
+      }
+    ),
     class    => "TestDB::Result::Emails",
     cond     => {"foreign.user_id" => "self.user_id"},
     name     => "emails",
@@ -30,12 +31,13 @@ cmp_deeply(
 );
 cmp_deeply(
   $info->($user, 'tags_per_user'),
-  { attrs => superhashof({
-      accessor       => "multi",
-      cascade_copy   => 1,
-      cascade_delete => 1,
-      join_type      => "LEFT",
-    }),
+  { attrs => superhashof(
+      { accessor       => "multi",
+        cascade_copy   => 1,
+        cascade_delete => 1,
+        join_type      => "LEFT",
+      }
+    ),
     class    => "TestDB::Result::UsersTags",
     cond     => {"foreign.user_id" => "self.user_id"},
     name     => "tags_per_user",
@@ -60,10 +62,11 @@ cmp_deeply(
 my $email = $db->source('Emails');
 cmp_deeply(
   $info->($email, 'user'),
-  { attrs => superhashof({
-      accessor                  => "single",
-      is_foreign_key_constraint => 1,
-    }),
+  { attrs => superhashof(
+      { accessor                  => "single",
+        is_foreign_key_constraint => 1,
+      }
+    ),
     class    => "TestDB::Result::Users",
     cond     => {"foreign.user_id" => "self.user_id"},
     name     => "user",
@@ -78,12 +81,13 @@ cmp_deeply(
 my $tag = $db->source('Tags');
 cmp_deeply(
   $info->($tag, 'users_per_tag'),
-  { attrs => superhashof({
-      accessor       => "multi",
-      cascade_copy   => 1,
-      cascade_delete => 1,
-      join_type      => "LEFT",
-    }),
+  { attrs => superhashof(
+      { accessor       => "multi",
+        cascade_copy   => 1,
+        cascade_delete => 1,
+        join_type      => "LEFT",
+      }
+    ),
     class    => "TestDB::Result::UsersTags",
     cond     => {"foreign.tag_id" => "self.tag_id"},
     name     => "users_per_tag",
