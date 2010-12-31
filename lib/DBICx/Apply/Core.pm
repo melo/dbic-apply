@@ -155,6 +155,7 @@ sub parse_data {
 
       $role = 'master';
       $f    = $info->{link_name};
+      $info = relationship_info($source, $f);
     }
 
     push @{$splited{$role}}, [$f, $v, $info];

@@ -23,8 +23,9 @@ cmp_deeply(
     },
     master => [
       ['emails', [{email => 'me@world.domination.org'}], ignore()],
-      [ 'tags_per_user', [{tag => {tag => 'nice'}}, {tag => {tag => 'word'}}],
-        ignore()
+      [ 'tags_per_user',
+        [{tag => {tag => 'nice'}}, {tag => {tag => 'word'}}],
+        superhashof({source => 'TestDB::Result::UsersTags'}),
       ]
     ],
   },
