@@ -130,13 +130,13 @@ sub relationship_info {
   return unless exists $rel_registry{$source}{$name};
 
   my $meta = $rel_registry{$source}{$name};
-  relationship_info_recalc($source, $name, $meta)
+  _relationship_info_recalc($source, $name, $meta)
     if exists $meta->{__need_recalc};
 
   return $meta;
 }
 
-sub relationship_info_recalc {
+sub _relationship_info_recalc {
   my ($source, $name, $meta) = @_;
   delete $meta->{__need_recalc};
 
