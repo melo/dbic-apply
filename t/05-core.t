@@ -152,4 +152,18 @@ subtest '_collect_cond_fields' => sub {
   );
 };
 
+subtest '_merge_cond_fields' => sub {
+  my $mcf = \&DBICx::Apply::Core::_merge_cond_fields;
+
+  my $source   = $db->source('Users');
+  my $email_ri = DBICx::Apply::Core::relationship_info($source, 'emails');
+  my $user     = $source->resultset->create({login => 'm', name => 'M'});
+
+  cmp_deeply(
+    $mcf->({}, $email_ri, $user),
+    {user_id => $user->id},
+    'Merged Users email relation cond fields ok'
+  );
+};
+
 done_testing();

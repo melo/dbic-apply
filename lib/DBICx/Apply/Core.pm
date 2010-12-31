@@ -70,6 +70,27 @@ sub apply_slave_role_relations {
 }
 
 
+=private _merge_cond_fields
+=cut
+
+sub _merge_cond_fields {
+  my ($dest, $info, $src) = @_;
+
+  ## Please God, make ResultSource::_resolve_condition() public again...
+
+  my $fields = _collect_cond_fields($info);
+  for my $src_f (keys %$fields) {
+    ## FIXME: think of a better error message
+    ## (and no, the one from _resolve_condition is not it)
+    confess("Something went horribly wrong, please send me a test case :), ")
+      unless $src->has_column_loaded($src_f);
+    $dest->{$fields->{$src_f}} = $src->get_column($src_f);
+  }
+
+  return $dest;
+}
+
+
 =private _collect_cond_fields
 
 Extract a hashref with pairs (local field => remote field) based on a
