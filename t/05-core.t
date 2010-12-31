@@ -16,20 +16,26 @@ subtest 'find_unique_cond' => sub {
 
   cmp_deeply(
     [$f->($user_s, {login => 'x', password => 'y'})],
-    [{login => 'x'}, 'login_un'],
+    ['login_un', {login => 'x'}],
     'Found login key'
   );
 
   cmp_deeply(
     [$f->($user_s, {user_id => 1, login => 'x', password => 'y'})],
-    [{user_id => 1}, 'primary'],
+    ['primary', {user_id => 1}],
     'Primary key takes precedence over other unique keys'
+  );
+
+  is(
+    scalar($f->($user_s, {user_id => 1, login => 'x', password => 'y'})),
+    'primary',
+    'Primary key takes precedence over other unique keys (scalar ctx)'
   );
 
   my $email_s = $db->source('Emails');
   cmp_deeply(
     [$f->($email_s, {user_id => 1, email => 'x@y'})],
-    [{user_id => 1, email => 'x@y'}, 'email_per_user_un'],
+    ['email_per_user_un', {user_id => 1, email => 'x@y'}],
     'Multiple column unique key ok'
   );
 };
@@ -63,8 +69,7 @@ subtest 'Relationship Registry' => sub {
 
   is(
     exception {
-      DBICx::Apply::Core::set_relationship_info($src,
-        rel1 => {a => 1});
+      DBICx::Apply::Core::set_relationship_info($src, rel1 => {a => 1});
     },
     undef,
     'Set rel1 for new source with empty relationship_info()'
@@ -83,8 +88,7 @@ subtest 'Relationship Registry' => sub {
 
   is(
     exception {
-      DBICx::Apply::Core::set_relationship_info($src,
-        rel2 => {a => 1});
+      DBICx::Apply::Core::set_relationship_info($src, rel2 => {a => 1});
     },
     undef,
     'Set rel2 for source with proper relationship_info()'

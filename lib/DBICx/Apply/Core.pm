@@ -85,8 +85,8 @@ CONSTRAINT: for my $name ('primary', keys %constraints) {
   }
 
   return unless $found;
-  return (\%cond, $found) if wantarray;
-  return \%cond;
+  return ($found, \%cond) if wantarray;
+  return $found;
 }
 
 
@@ -104,7 +104,7 @@ the source.
 sub find_one_row {
   my ($source) = @_;
 
-  my ($cond, $key) = find_unique_cond(@_);
+  my ($key, $cond) = find_unique_cond(@_);
   return unless $cond;
 
   return $source->resultset->find($cond, {key => $key});
