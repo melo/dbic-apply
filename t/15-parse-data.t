@@ -11,23 +11,28 @@ my $db = TestDB->test_db();
 cmp_deeply(
   DBICx::Apply::Core::parse_data(
     $db->source('Users'),
-    { name   => 'my name',
-      login  => 'my login',
-      emails => {email => 'me@world.domination.org'},
-      tags   => [{tag => 'nice'}, {tag => 'word'}],
+    { name          => 'my name',
+      login         => 'my login',
+      emails        => {email => 'me@world.domination.org'},
+      tags_per_user => [{tag => {tag => 'love'}}],
+      tags          => [{tag => 'nice'}, {tag => 'word'}],
     }
   ),
   { fields => {
       name  => 'my name',
       login => 'my login',
     },
-    master => [
+    master => bag(
       ['emails', [{email => 'me@world.domination.org'}], ignore()],
       [ 'tags_per_user',
         [{tag => {tag => 'nice'}}, {tag => {tag => 'word'}}],
         superhashof({source => 'TestDB::Result::UsersTags'}),
+      ],
+      [ 'tags_per_user',
+        [{tag => {tag => 'love'}}],
+        superhashof({source => 'TestDB::Result::UsersTags'}),
       ]
-    ],
+    ),
   },
   'Parsed sample data for Users ok'
 );
