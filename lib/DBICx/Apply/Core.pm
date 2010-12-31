@@ -31,6 +31,10 @@ sub apply {
     $row = $source->resultset->create($fields);
   }
 
+  if (my $rels = $split->{master}) {
+    apply_master_role_relations($source, $rels, $row);
+  }
+
   return $row;
 }
 
@@ -67,6 +71,39 @@ sub apply_slave_role_relations {
   }
 
   return \%frg_keys;
+}
+
+
+=function apply_master_role_relations
+=cut
+
+sub apply_master_role_relations {
+  my ($source, $rels, $row) = @_;
+
+  ## Should we use ResultSource::reverse_relationship_info here? I don't
+  ## see why.
+  ## On one hand, it would be easier (less code) to use: just use the
+  ## reverse rel name and $row, include them in the $data, and apply()
+  ## it.
+  ## On the other hand, I worry about schemas where there isn't a
+  ## reverse_relationship_info though. Not sure if I should worry about
+  ## that corner case, but I do.
+  ## I assume that the cond in this side
+  ## relation is the inverse of the other side, so why bother to
+  ## discover the other side? (just checked: for reverse_relationship_info
+  ## the conditions must be the exact reverse of each other, so if they are
+  ## why bother?)
+  ## I'm sure I'm missing something and some day someone smarter will
+  ## explain it to me.
+
+  for (@$rels) {
+    my ($name, $rows, $info) = @$_;
+
+    for my $data (@$rows) {
+      _merge_cond_fields($data, $info, $row);
+      apply($source->related_source($name), $data);
+    }
+  }
 }
 
 
