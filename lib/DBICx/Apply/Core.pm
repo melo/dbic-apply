@@ -8,7 +8,7 @@ use Scalar::Util 'blessed';
 use Carp;
 
 
-=private parse_data
+=function parse_data
 
 Given a ResultSource and a data hashref, splits the fields between
 columns, and the three type of relations we need: master, slave and via
@@ -41,7 +41,7 @@ sub parse_data {
 }
 
 
-=private find_unique_cond
+=function find_unique_cond
 
 Given a ResultSource and a hashref with fields, searches all the unique
 constraints for one that could be used to find a unique row.
@@ -79,7 +79,7 @@ CONSTRAINT: for my $name ('primary', keys %constraints) {
 }
 
 
-=private find_one_row
+=function find_one_row
 
 Given a ResultSource and a hashref with fields, returns a single Row if
 a unique row could be found based on the fields present.
