@@ -119,11 +119,6 @@ subtest 'Relationship Registry' => sub {
       b         => 2,
       name      => 'rel3',
       link_name => 'rel2',
-      link_info => {
-        a    => 1,
-        b    => 2,
-        name => 'rel2',
-      },
     },
     '... and relationship_info returns expected merged info'
   );

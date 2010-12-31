@@ -21,8 +21,12 @@ cmp_deeply(
       name  => 'my name',
       login => 'my login',
     },
-    master => [['emails', [{email => 'me@world.domination.org'}], ignore()]],
-    via => [['tags', [{tag => 'nice'}, {tag => 'word'}], ignore()]],
+    master => [
+      ['emails', [{email => 'me@world.domination.org'}], ignore()],
+      [ 'tags_per_user', [{tag => {tag => 'nice'}}, {tag => {tag => 'word'}}],
+        ignore()
+      ]
+    ],
   },
   'Parsed sample data for Users ok'
 );

@@ -46,21 +46,9 @@ cmp_deeply(
 cmp_deeply(
   $info->($user, 'tags'),
   { link_frg_name => "tag",
-    link_info     => {
-      attrs => {
-        accessor       => "multi",
-        cascade_copy   => 1,
-        cascade_delete => 1,
-        join_type      => "LEFT",
-      },
-      class    => "TestDB::Result::UsersTags",
-      cond     => {"foreign.user_id" => "self.user_id"},
-      name     => "tags_per_user",
-      our_role => "master",
-      source   => "TestDB::Result::UsersTags",
-    },
-    link_name => "tags_per_user",
-    our_role  => "via",
+    link_name     => "tags_per_user",
+    name          => "tags",
+    our_role      => "via",
   },
   'Meta for many_to_many Users => Tags ok'
 );
@@ -104,23 +92,9 @@ cmp_deeply(
 cmp_deeply(
   $info->($tag, 'users'),
   { link_frg_name => "user",
-    link_info     => {
-      attrs => {
-        accessor       => "multi",
-        cascade_copy   => 1,
-        cascade_delete => 1,
-        join_type      => "LEFT",
-      },
-      class    => "TestDB::Result::UsersTags",
-      cond     => {"foreign.tag_id" => "self.tag_id"},
-      max_card => -1,
-      min_card => 0,
-      name     => "users_per_tag",
-      our_role => "master",
-      source   => "TestDB::Result::UsersTags",
-    },
-    link_name => "users_per_tag",
-    our_role  => "via",
+    link_name     => "users_per_tag",
+    name          => "users",
+    our_role      => "via",
   },
   'Meta for many_to_many Tags => Users ok'
 );

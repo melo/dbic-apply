@@ -34,6 +34,17 @@ sub parse_data {
 
     my $role = $info->{our_role};
     $v = [$v] unless $role eq 'slave' or ref($v) eq 'ARRAY';
+
+    ## Convert many_to_many into a has_many
+    if ($role eq 'via') {
+      my $r = $info->{link_frg_name};
+
+      $_ = {$r => $_} for @$v;
+
+      $role = 'master';
+      $f    = $info->{link_name};
+    }
+
     push @{$splited{$role}}, [$f, $v, $info];
   }
 
@@ -127,16 +138,12 @@ sub relationship_info {
 
 sub relationship_info_recalc {
   my ($source, $name, $meta) = @_;
+  delete $meta->{__need_recalc};
 
   my $dbic_meta = $source->relationship_info($name);
-  $dbic_meta = {} unless $dbic_meta;    ## many-to-many are not rels
+  return unless $dbic_meta;
 
-  ## Add some info to m2m rels
-  $meta->{link_info} = relationship_info($source, $meta->{link_name})
-    if exists $meta->{link_name};
-
-  %$meta = (%$meta, %$dbic_meta);
-  delete $meta->{__need_recalc};
+  %$meta = (%$dbic_meta, %$meta);
 
   return;
 }
