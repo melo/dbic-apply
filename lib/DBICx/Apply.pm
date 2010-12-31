@@ -13,12 +13,8 @@ use DBICx::Apply::Core;
 sub has_one {
   my ($self, $name, @rest) = @_;
 
-  DBICx::Apply::Core::set_relationship_info(
-    $self, $name,
-    { our_role => 'master',
-      min_card => 1,
-      max_card => 1,
-    },
+  DBICx::Apply::Core::set_relationship_info($self, $name,
+    {our_role => 'master'},
   );
 
   return $self->next::method($name, @rest);
@@ -27,12 +23,8 @@ sub has_one {
 sub belongs_to {
   my ($self, $name, @rest) = @_;
 
-  DBICx::Apply::Core::set_relationship_info(
-    $self, $name,
-    { our_role => 'slave',
-      min_card => 0,
-      max_card => 1,
-    },
+  DBICx::Apply::Core::set_relationship_info($self, $name,
+    {our_role => 'slave'},
   );
 
   return $self->next::method($name, @rest);
@@ -41,12 +33,8 @@ sub belongs_to {
 sub might_have {
   my ($self, $name, @rest) = @_;
 
-  DBICx::Apply::Core::set_relationship_info(
-    $self, $name,
-    { our_role => 'master',
-      min_card => 0,
-      max_card => 1,
-    },
+  DBICx::Apply::Core::set_relationship_info($self, $name,
+    {our_role => 'master'},
   );
 
   return $self->next::method($name, @rest);
@@ -55,12 +43,8 @@ sub might_have {
 sub has_many {
   my ($self, $name, @rest) = @_;
 
-  DBICx::Apply::Core::set_relationship_info(
-    $self, $name,
-    { our_role => 'master',
-      min_card => 0,
-      max_card => -1,
-    },
+  DBICx::Apply::Core::set_relationship_info($self, $name,
+    {our_role => 'master'},
   );
 
   return $self->next::method($name, @rest);
@@ -74,8 +58,6 @@ sub many_to_many {
     { our_role      => 'via',
       link_name     => $l_rel,
       link_frg_name => $f_rel,
-      min_card      => 0,
-      max_card      => -1,
     },
   );
 
