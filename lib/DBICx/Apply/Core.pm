@@ -84,6 +84,7 @@ sub _merge_cond_fields {
     ## (and no, the one from _resolve_condition is not it)
     confess("Something went horribly wrong, please send me a test case :), ")
       unless $src->has_column_loaded($src_f);
+    ## TODO: what if $dest is a Row object already?
     $dest->{$fields->{$src_f}} = $src->get_column($src_f);
   }
 
@@ -188,6 +189,7 @@ CONSTRAINT: for my $name ('primary', keys %constraints) {
 
     %cond = ();
     for my $c (@$c_cols) {
+      ## TODO: what if $data is a Row object already?
       next CONSTRAINT unless exists $data->{$c};
       $cond{$c} = $data->{$c};
     }
