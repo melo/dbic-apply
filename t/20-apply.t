@@ -53,6 +53,7 @@ subtest 'Cases with a slave relationship' => sub {
   $u = $e->user;
   is($u->login, 'l', '... login as expected');
   is($u->name,  'L', '... name as expected');
+  is($u->emails->count, 1,   '... user has 1 emails now');
 
   ## create - find
   is(
@@ -67,6 +68,21 @@ subtest 'Cases with a slave relationship' => sub {
   $u = $e->user;
   is($u->login, 'l', '... login as expected');
   is($u->name,  'L', '... name as expected');
+  is($u->emails->count, 2,   '... user has 2 emails now');
+
+  ## create - object
+  is(
+    exception {
+      $e = $rs->apply({email => 'create_obj@slaves', user => $u});
+    },
+    undef,
+    'Create email with existing user object, no exceptions'
+  );
+  is($e->email, 'create_obj@slaves', '... email as expected');
+  $u = $e->user;
+  is($u->login,         'l', '... login as expected');
+  is($u->name,          'L', '... name as expected');
+  is($u->emails->count, 3,   '... user has 3 emails now');
 
   ## create - update
   is(
