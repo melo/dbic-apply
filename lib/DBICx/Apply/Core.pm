@@ -20,7 +20,7 @@ sub apply {
 
   if (my $rels = $split->{slave}) {
     my $extra_fields = apply_slave_role_relations($source, $rels);
-    $fields = {%$fields, %$extra_fields} if %$extra_fields;
+    $fields = {%$fields, %$extra_fields};
   }
 
   $row = find_one_row($source, $fields) unless $row;
