@@ -140,7 +140,40 @@ TODO: {
 };
 
 
-subtest 'Simple master cases' => sub {
+subtest 'might_have cases' => sub {
+  my $db = TestDB->test_db();
+  my $rs = $db->resultset('Users');
+  my $u;
+
+  is(
+    exception {
+      $u = $rs->apply(
+        { login    => 'l',
+          name     => 'L',
+          personal => {phone => '1 800 BITE ME'}
+        }
+      );
+    },
+    undef,
+    'Create user + personal, no exceptions'
+  );
+  is($u->login,           'l',             '... login as expected');
+  is($u->name,            'L',             '... name as expected');
+  is($u->personal->phone, '1 800 BITE ME', '... phone as expected');
+
+  is(
+    exception {
+      $u->apply({personal => {phone => '+1 800 BITE ME (ext HARD)'}});
+    },
+    undef,
+    'Updated user personal data, no exceptions'
+  );
+  $u->discard_changes;
+  is($u->personal->phone, '+1 800 BITE ME (ext HARD)', '... phone updated');
+};
+
+
+subtest 'has_many cases' => sub {
   my $db = TestDB->test_db();
   my $rs = $db->resultset('Users');
   my $u;
@@ -190,7 +223,8 @@ subtest 'All together now' => sub {
             login => 'me',
             name  => 'Mini Me',
             tags => [{tag => 'pretty'}, {tag => 'awesome'}, {tag => 'stuff'}],
-            emails => [{email => 'me@second'}, {email => 'me@third'}],
+            emails   => [{email => 'me@second'}, {email => 'me@third'}],
+            personal => {phone  => '+1 800 GAME ON'},
           }
         }
       );
@@ -208,6 +242,7 @@ subtest 'All together now' => sub {
   is($u->name,          'Mini Me', '...... name as expected');
   is($u->emails->count, 3,         '...... three emails for this user');
   is($u->tags->count,   3,         '...... and three tags');
+  is($u->personal->phone, '+1 800 GAME ON', '...... phone as expected');
 };
 
 
