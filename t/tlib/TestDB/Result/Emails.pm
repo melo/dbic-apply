@@ -28,6 +28,14 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key('email_id');
 __PACKAGE__->add_unique_constraint(email_per_user_un => ['email', 'user_id']);
 
+__PACKAGE__->might_have(
+  active_for => 'TestDB::Result::Users',
+  { 'foreign.active_email_id' => 'self.email_id',
+    'foreign.user_id'         => 'self.user_id'
+  },
+  { cascade_delete => 0 },
+);
+
 __PACKAGE__->belongs_to(
   user => 'TestDB::Result::Users',
   {'foreign.user_id' => 'self.user_id'}

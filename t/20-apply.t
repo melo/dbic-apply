@@ -223,8 +223,11 @@ subtest 'All together now' => sub {
             login => 'me',
             name  => 'Mini Me',
             tags => [{tag => 'pretty'}, {tag => 'awesome'}, {tag => 'stuff'}],
-            emails   => [{email => 'me@second'}, {email => 'me@third'}],
-            personal => {phone  => '+1 800 GAME ON'},
+            emails => [
+              {email => 'me@second'},
+              {email => 'me@third', active_for => {}}
+            ],
+            personal => {phone => '+1 800 GAME ON'},
           }
         }
       );
@@ -243,6 +246,7 @@ subtest 'All together now' => sub {
   is($u->emails->count, 3,         '...... three emails for this user');
   is($u->tags->count,   3,         '...... and three tags');
   is($u->personal->phone, '+1 800 GAME ON', '...... phone as expected');
+  is($u->active_email->email, 'me@third', '...... active_email as expected');
 };
 
 

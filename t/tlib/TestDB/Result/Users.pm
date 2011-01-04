@@ -29,6 +29,11 @@ __PACKAGE__->add_columns(
     size        => 40,
     is_nullable => 1,
   },
+
+  'active_email_id' => {
+    data_type   => 'integer',
+    is_nullable => 1,
+  }
 );
 
 __PACKAGE__->set_primary_key('user_id');
@@ -40,6 +45,13 @@ __PACKAGE__->might_have(
 );
 
 __PACKAGE__->has_many(emails => 'TestDB::Result::Emails', 'user_id');
+__PACKAGE__->belongs_to(
+  active_email => 'TestDB::Result::Emails',
+  { 'foreign.email_id' => 'self.active_email_id',
+    'foreign.user_id'  => 'self.user_id'
+  }
+);
+
 
 __PACKAGE__->has_many(
   tags_per_user => 'TestDB::Result::UsersTags',
