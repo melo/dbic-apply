@@ -51,8 +51,8 @@ subtest 'Cases with a slave relationship' => sub {
   );
   is($e->email, 'create_create@slaves', '... email as expected');
   $u = $e->user;
-  is($u->login, 'l', '... login as expected');
-  is($u->name,  'L', '... name as expected');
+  is($u->login,         'l', '... login as expected');
+  is($u->name,          'L', '... name as expected');
   is($u->emails->count, 1,   '... user has 1 emails now');
 
   ## create - find
@@ -66,8 +66,8 @@ subtest 'Cases with a slave relationship' => sub {
   );
   is($e->email, 'create_find@slaves', '... email as expected');
   $u = $e->user;
-  is($u->login, 'l', '... login as expected');
-  is($u->name,  'L', '... name as expected');
+  is($u->login,         'l', '... login as expected');
+  is($u->name,          'L', '... name as expected');
   is($u->emails->count, 2,   '... user has 2 emails now');
 
   ## create - object
