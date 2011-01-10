@@ -167,7 +167,7 @@ columns, and the three type of relations we need: master, slave and via
 
 sub parse_data {
   my ($source, $data) = @_;
-  my %splited;
+  my %splited = (fields => {});
 
   for my $f (keys %$data) {
     my $v = $data->{$f};

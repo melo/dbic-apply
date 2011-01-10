@@ -50,4 +50,10 @@ cmp_deeply(
   'Parsed sample data for Emails ok'
 );
 
+cmp_deeply(
+  DBICx::Apply::Core::parse_data($db->source('Emails'), {}),
+  {fields => {}},
+  'Parsed empty set of fields, ok'
+);
+
 done_testing();
