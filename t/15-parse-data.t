@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use DBICx::Apply::Tests;
+use Test::Fatal;
 use DBICx::Apply::Core;
 
 
@@ -54,6 +55,14 @@ cmp_deeply(
   DBICx::Apply::Core::parse_data($db->source('Emails'), {}),
   {fields => {}},
   'Parsed empty set of fields, ok'
+);
+
+like(
+  exception {
+    DBICx::Apply::Core::parse_data($db->source('Emails'), {no => 'field'});
+  },
+  qr/Name 'no' not a field or relationship of 'Emails'/,
+  'Expected exception with unkown field/relationship'
 );
 
 done_testing();

@@ -178,7 +178,8 @@ sub parse_data {
     }
 
     my $info = relationship_info($source, $f);
-    croak("Name '$f' not a field or relationship of '$source'")
+    croak("Name '$f' not a field or relationship of '"
+        . $source->source_name . "'")
       unless $info;
 
     my $role = $info->{our_role};
