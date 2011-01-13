@@ -170,6 +170,25 @@ subtest 'might_have cases' => sub {
   );
   $u->discard_changes;
   is($u->personal->phone, '+1 800 BITE ME (ext HARD)', '... phone updated');
+
+  ## Make sure the internal DBIC cache is cleared
+  is(
+    exception {
+      $u = $rs->apply(
+        { login    => 'l2',
+          name     => 'L2',
+          personal => {phone => '1 800 BITE ME'}
+        }
+      );
+    },
+    undef,
+    'Create anothre user + personal, no exceptions'
+  );
+  is($u->personal->phone, '1 800 BITE ME', '... expected phone');
+
+  is(exception { $u->apply({personal => {phone => '1 800 LICK ME'}}) },
+    undef, 'Updated personal phone ok');
+  is($u->personal->phone, '1 800 LICK ME', '... expected updated phone');
 };
 
 

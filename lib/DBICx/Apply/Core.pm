@@ -102,6 +102,12 @@ sub apply_master_role_relations {
     for my $data (@$rows) {
       _merge_cond_fields($data, $info, $row);
       apply($source->related_source($name), $data);
+
+      ### DIRTY HACK: no public API to clear this caches
+      ## TODO: Alternative: if $info->{attr}{accessor} == single, fetch
+      ## row using the acessor and pass it to apply as third argument -
+      ## probably better anyway
+      delete $row->{_relationship_data}{$name};
     }
   }
 }
