@@ -44,6 +44,10 @@ __PACKAGE__->might_have(
   {'foreign.user_id' => 'self.user_id'}
 );
 
+
+__PACKAGE__->might_have(alias => 'TestDB::Result::Aliases', 'user_id');
+
+
 __PACKAGE__->has_many(emails => 'TestDB::Result::Emails', 'user_id');
 __PACKAGE__->belongs_to(
   active_email => 'TestDB::Result::Emails',

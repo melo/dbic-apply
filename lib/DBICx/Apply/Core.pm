@@ -28,9 +28,16 @@ sub apply {
     if $target->can('_dbicx_apply_filter');
 
   $row = find_one_row($source, $fields) unless $row;
-  $row = _do_apply_on_row($source, $fields, $row);
+  if ($target->can('_dbicx_apply_impl')) {
+    $row =
+      $target->_dbicx_apply_impl($source, $fields, $row, \&_do_apply_on_row);
+  }
+  else {
+    $row = _do_apply_on_row($source, $fields, $row);
+  }
 
-  if (my $rels = $split->{master}) {
+  my $rels = $split->{master};
+  if ($row && $rels) {
     apply_master_role_relations($source, $rels, $row);
   }
 
