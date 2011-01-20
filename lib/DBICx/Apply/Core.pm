@@ -24,15 +24,24 @@ sub apply {
   }
 
   $row = find_one_row($source, $fields) unless $row;
+  $row = _do_apply_on_row($source, $fields, $row);
+
+  if (my $rels = $split->{master}) {
+    apply_master_role_relations($source, $rels, $row);
+  }
+
+  return $row;
+}
+
+
+sub _do_apply_on_row {
+  my ($source, $fields, $row) = @_;
+
   if ($row) {
     $row->update($fields);
   }
   else {
     $row = $source->resultset->create($fields);
-  }
-
-  if (my $rels = $split->{master}) {
-    apply_master_role_relations($source, $rels, $row);
   }
 
   return $row;
