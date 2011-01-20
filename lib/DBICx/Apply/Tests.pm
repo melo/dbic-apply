@@ -1,4 +1,4 @@
-package # Internal class, hide from PAUSE
+package    # Internal class, hide from PAUSE
   DBICx::Apply::Tests;
 
 use lib 't/tlib';

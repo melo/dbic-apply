@@ -22,7 +22,7 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key('tag_id');
 __PACKAGE__->add_unique_constraint(tag_un => ['tag']);
 
-__PACKAGE__->has_many(users_per_tag => 'TestDB::Result::UsersTags','tag_id');
+__PACKAGE__->has_many(users_per_tag => 'TestDB::Result::UsersTags', 'tag_id');
 __PACKAGE__->many_to_many(users => 'users_per_tag' => 'user');
 
 

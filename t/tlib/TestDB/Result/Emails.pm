@@ -33,7 +33,7 @@ __PACKAGE__->might_have(
   { 'foreign.active_email_id' => 'self.email_id',
     'foreign.user_id'         => 'self.user_id'
   },
-  { cascade_delete => 0 },
+  {cascade_delete => 0},
 );
 
 __PACKAGE__->belongs_to(
