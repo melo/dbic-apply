@@ -41,4 +41,15 @@ __PACKAGE__->belongs_to(
   {'foreign.user_id' => 'self.user_id'}
 );
 
+
+sub _dbicx_apply_filter {
+  my ($class, $source, $f, $row) = @_;
+
+  $f->{email} = lc($f->{email})
+    if exists($f->{email}) && defined($f->{email});
+
+  return $f;
+}
+
+
 1;

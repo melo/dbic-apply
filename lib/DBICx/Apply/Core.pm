@@ -23,6 +23,10 @@ sub apply {
     $fields = {%$fields, %$extra_fields};
   }
 
+  my $target = $source->result_class;
+  $fields = $target->_dbicx_apply_filter($source, $fields, $row)
+    if $target->can('_dbicx_apply_filter');
+
   $row = find_one_row($source, $fields) unless $row;
   $row = _do_apply_on_row($source, $fields, $row);
 
