@@ -49,7 +49,7 @@ sub _do_apply_on_row {
   my ($source, $fields, $row) = @_;
 
   if ($row) {
-    $row->update($fields);
+    $row->update($fields) if %$fields;
   }
   else {
     $row = $source->resultset->create($fields);
