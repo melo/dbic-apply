@@ -198,6 +198,23 @@ sub parse_data {
   for my $f (keys %$data) {
     my $v = $data->{$f};
 
+    if ($f eq '__ID') {
+      $v = [$v] unless ref($v);
+      my @pks = $source->primary_columns;
+      if (scalar(@pks) != scalar(@$v)) {
+        confess('Field __ID has '
+            . scalar(@$v)
+            . ' elements but PK for source '
+            . $source->source_name
+            . ' needs '
+            . scalar(@pks)
+            . ', ');
+      }
+      my $flds = $splited{fields} ||= {};
+      @$flds{@pks} = @$v;
+      next;
+    }
+
     if ($source->has_column($f)) {
       $splited{fields}{$f} = $v;
       next;

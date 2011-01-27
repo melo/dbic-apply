@@ -10,6 +10,26 @@ use DBICx::Apply::Core;
 my $db = TestDB->test_db();
 
 cmp_deeply(
+  DBICx::Apply::Core::parse_data($db->source('Users'), {__ID => 42}),
+  {fields => {user_id => 42}},
+  '__ID special field (single PK), ok'
+);
+
+cmp_deeply(
+  DBICx::Apply::Core::parse_data($db->source('UsersTags'), {__ID => [42, 9]}),
+  {fields => {user_id => 42, tag_id => 9}},
+  '__ID special field (multiple PKs), ok'
+);
+
+like(
+  exception {
+    DBICx::Apply::Core::parse_data($db->source('UsersTags'), {__ID => 42});
+  },
+  qr/Field __ID has \d+ elements but PK for source UsersTags needs \d+, /,
+  '__ID parsing catches bad number of value for PK'
+);
+
+cmp_deeply(
   DBICx::Apply::Core::parse_data(
     $db->source('Users'),
     { name          => 'my name',
