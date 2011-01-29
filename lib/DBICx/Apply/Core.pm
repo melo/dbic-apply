@@ -193,7 +193,7 @@ columns, and the three type of relations we need: master, slave and via
 
 sub parse_data {
   my ($source, $data) = @_;
-  my %splited = (fields => {});
+  my %splited = (fields => {}, action => 'ADD');
 
   for my $f (keys %$data) {
     my $v = $data->{$f};
@@ -215,6 +215,11 @@ sub parse_data {
       next;
     }
 
+    if ($f eq '__ACTION') {
+      $splited{action} = $v || 'ADD';
+      next;
+    }
+
     if ($source->has_column($f)) {
       $splited{fields}{$f} = $v;
       next;
@@ -232,7 +237,11 @@ sub parse_data {
     if ($role eq 'via') {
       my $r = $info->{link_frg_name};
 
-      $_ = {$r => $_} for @$v;
+      for my $i (@$v) {
+        my $action = delete $i->{__ACTION};
+        $i = {$r => $i};
+        $i->{__ACTION} = $action if $action;
+      }
 
       $role = 'master';
       $f    = $info->{link_name};

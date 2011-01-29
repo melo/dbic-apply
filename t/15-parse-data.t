@@ -11,13 +11,13 @@ my $db = TestDB->test_db();
 
 cmp_deeply(
   DBICx::Apply::Core::parse_data($db->source('Users'), {__ID => 42}),
-  {fields => {user_id => 42}},
+  {fields => {user_id => 42}, action => 'ADD'},
   '__ID special field (single PK), ok'
 );
 
 cmp_deeply(
   DBICx::Apply::Core::parse_data($db->source('UsersTags'), {__ID => [42, 9]}),
-  {fields => {user_id => 42, tag_id => 9}},
+  {fields => {user_id => 42, tag_id => 9}, action => 'ADD'},
   '__ID special field (multiple PKs), ok'
 );
 
@@ -36,17 +36,20 @@ cmp_deeply(
       login         => 'my login',
       emails        => {email => 'me@world.domination.org'},
       tags_per_user => [{tag => {tag => 'love'}}],
-      tags          => [{tag => 'nice'}, {tag => 'word'}],
+      tags          => [{tag => 'nice'}, {tag => 'word', __ACTION => 'IGN'}],
     }
   ),
-  { fields => {
+  { action => 'ADD',
+    fields => {
       name  => 'my name',
       login => 'my login',
     },
     master => bag(
       ['emails', [{email => 'me@world.domination.org'}], ignore()],
       [ 'tags_per_user',
-        [{tag => {tag => 'nice'}}, {tag => {tag => 'word'}}],
+        [ {tag => {tag => 'nice'}},
+          {__ACTION => 'IGN', tag => {tag => 'word'}}
+        ],
         superhashof({source => 'TestDB::Result::UsersTags'}),
       ],
       [ 'tags_per_user',
@@ -61,19 +64,21 @@ cmp_deeply(
 cmp_deeply(
   DBICx::Apply::Core::parse_data(
     $db->source('Emails'),
-    { email => 'mini_me@here',
-      user  => {login => 'xpto'},
+    { email    => 'mini_me@here',
+      user     => {login => 'xpto'},
+      __ACTION => 'DEL'
     }
   ),
   { fields => {email => 'mini_me@here'},
-    slave => [['user', {login => 'xpto'}, ignore()]],
+    slave  => [['user', {login => 'xpto'}, ignore()]],
+    action => 'DEL',
   },
   'Parsed sample data for Emails ok'
 );
 
 cmp_deeply(
   DBICx::Apply::Core::parse_data($db->source('Emails'), {}),
-  {fields => {}},
+  {fields => {}, action => 'ADD'},
   'Parsed empty set of fields, ok'
 );
 
