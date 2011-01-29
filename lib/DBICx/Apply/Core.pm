@@ -139,9 +139,17 @@ sub apply_master_role_relations {
 sub _merge_cond_fields {
   my ($dest, $info, $src) = @_;
 
-  ## Please God, make ResultSource::_resolve_condition() public again...
-
   my $fields = _collect_cond_fields($info);
+  return _copy_cond_fields($dest, $fields, $src);
+}
+
+
+=private _copy_cond_fields
+=cut
+
+sub _copy_cond_fields {
+  my ($dest, $fields, $src) = @_;
+
   for my $src_f (keys %$fields) {
     ## FIXME: think of a better error message
     ## (and no, the one from _resolve_condition is not it)
