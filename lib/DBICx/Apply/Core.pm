@@ -144,6 +144,17 @@ sub _merge_cond_fields {
 }
 
 
+=private _merge_rev_cond_fields
+=cut
+
+sub _merge_rev_cond_fields {
+  my ($dest, $info, $src) = @_;
+
+  my $fields = _collect_cond_fields($info);
+  return _copy_cond_fields($dest, {reverse %$fields}, $src);
+}
+
+
 =private _copy_cond_fields
 =cut
 
