@@ -15,8 +15,9 @@ use Carp;
 sub apply {
   my ($source, $data, $row) = @_;
 
-  my $split = parse_data($source, $data);
+  my $split  = parse_data($source, $data);
   my $fields = $split->{fields};
+  my $action = $split->{action};
 
   if (my $rels = $split->{slave}) {
     my $extra_fields = apply_slave_role_relations($source, $rels, $row);
@@ -27,13 +28,14 @@ sub apply {
   $fields = $target->_dbicx_apply_filter($source, $fields, $row)
     if $target->can('_dbicx_apply_filter');
 
+
   $row = find_one_row($source, $fields) unless $row;
   if ($target->can('_dbicx_apply_impl')) {
-    $row =
-      $target->_dbicx_apply_impl($source, $fields, $row, \&_do_apply_on_row);
+    $row = $target->_dbicx_apply_impl($source, $fields, $row, $action,
+      \&_do_apply_on_row);
   }
   else {
-    $row = _do_apply_on_row($source, $fields, $row);
+    $row = _do_apply_on_row($source, $fields, $row, $action);
   }
 
   my $rels = $split->{master};
@@ -46,13 +48,23 @@ sub apply {
 
 
 sub _do_apply_on_row {
-  my ($source, $fields, $row) = @_;
+  my ($source, $fields, $row, $action) = @_;
 
-  if ($row) {
-    $row->update($fields) if %$fields;
+  if ($action eq 'ADD') {
+    if ($row) {
+      $row->update($fields) if %$fields;
+    }
+    else {
+      $row = $source->resultset->create($fields);
+    }
   }
+  elsif ($action eq 'DEL') {
+    $row->delete if $row;
+    $row = undef;
+  }
+  elsif ($action eq 'IGN') { }
   else {
-    $row = $source->resultset->create($fields);
+    confess("apply() does not recognize __ACTION '$action',");
   }
 
   return $row;
@@ -72,20 +84,17 @@ sub apply_slave_role_relations {
     $data = apply($source->related_source($name), $data)
       unless blessed($data);
 
-    ## We use the full object and let DBIC pull the required fields; not
-    ## sure if this is a good idea, but is quicker for now
-    ##
     ## FIXME: $data will be undef if the apply() above deleted this
     ## object. In that case, given that this is a slave relation, we
-    ## will be deleted also. We should probably set
-    ## $frg_keys{__delete__} to make that happen. Still needs more real
-    ## world usage before deciding proper behaviour.
+    ## will be deleted also. We should probably set $frg_keys{__ACTION}
+    ## to 'DEL' to make that happen. Still needs more real world usage
+    ## before deciding proper behaviour.
     ##
     ## It would probably work fine. But I don't know yet when to apply
-    ## the __delete__. Should we keep doing all slave apply()'s and only
-    ## then do the __delete__? And what about relations where we are the
+    ## the 'DEL'. Should we keep doing all slave apply()'s and only
+    ## then return the 'DEL'? And what about relations where we are the
     ## master? should we do the apply on all those relations and leave
-    ## the __delete__ on self to the very last? Or even: collect all
+    ## the 'DEL' on self to the very last? Or even: collect all
     ## deletes and do them in a single batch at the very end? Not sure.
 
     _merge_rev_cond_fields(\%frg_keys, $info, $data) if $data;

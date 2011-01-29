@@ -26,9 +26,11 @@ __PACKAGE__->belongs_to(user => 'TestDB::Result::Users', 'user_id');
 
 
 sub _dbicx_apply_impl {
-  my ($class, $source, $f, $row, $def) = @_;
+  my $class = shift;
+  my $def   = pop;
+  my (undef, $f, $row) = @_;
 
-  return $def->($source, $f, $row)
+  return $def->(@_)
     if exists($f->{alias}) && defined($f->{alias}) && length($f->{alias});
 
   $row->delete if $row;

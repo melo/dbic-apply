@@ -21,14 +21,10 @@ subtest 'Simple cases' => sub {
   is($u->login, 'd', '... login as expected');
   is($u->name,  'D', '... name as expected');
 
-TODO: {
-    local $TODO = "__delete__ support not implemented yet";
-
-    my $id = $u->id;
-    is(exception { $u->apply({__delete__ => 1}) },
-      undef, 'Deleted user, no exceptions');
-    is($rs->find($id), undef, '... could not find on our DB');
-  }
+  my $id = $u->id;
+  is(exception { $u->apply({__ACTION => 'DEL'}) },
+    undef, 'Deleted user, no exceptions');
+  is($rs->find($id), undef, '... could not find on our DB');
 };
 
 
@@ -217,16 +213,12 @@ subtest 'has_many cases' => sub {
     undef, 'Updated user emails, no exceptions');
   is($u->emails->count, 3, '... three emails as expected');
 
-TODO: {
-    local $TODO = "__delete__ support not implemented yet";
-
-    my $id = $u->id;
-    is(exception { $u->apply({__delete__ => 1}) },
-      undef, 'Deleted user, no exceptions');
-    is($rs->find($id), undef, '... could not find on our DB');
-    is($db->resultset('Emails')->search({user_id => $id})->count,
-      0, '... all emails also deleted (cascading delete)');
-  }
+  my $id = $u->id;
+  is(exception { $u->apply({__ACTION => 'DEL'}) },
+    undef, 'Deleted user, no exceptions');
+  is($rs->find($id), undef, '... could not find on our DB');
+  is($db->resultset('Emails')->search({user_id => $id})->count,
+    0, '... all emails also deleted (cascading delete)');
 };
 
 
