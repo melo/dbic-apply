@@ -19,7 +19,7 @@ sub apply {
   my $fields = $split->{fields};
 
   if (my $rels = $split->{slave}) {
-    my $extra_fields = apply_slave_role_relations($source, $rels);
+    my $extra_fields = apply_slave_role_relations($source, $rels, $row);
     $fields = {%$fields, %$extra_fields};
   }
 
@@ -63,7 +63,7 @@ sub _do_apply_on_row {
 =cut
 
 sub apply_slave_role_relations {
-  my ($source, $rels) = @_;
+  my ($source, $rels, $row) = @_;
   my %frg_keys;
 
   for (@$rels) {
@@ -87,7 +87,11 @@ sub apply_slave_role_relations {
     ## master? should we do the apply on all those relations and leave
     ## the __delete__ on self to the very last? Or even: collect all
     ## deletes and do them in a single batch at the very end? Not sure.
-    $frg_keys{$name} = $data if $data;
+
+    _merge_rev_cond_fields(\%frg_keys, $info, $data) if $data;
+
+    ### DIRTY HACK: no public API to clear this caches
+    delete $row->{_relationship_data}{$name} if $row;
   }
 
   return \%frg_keys;
