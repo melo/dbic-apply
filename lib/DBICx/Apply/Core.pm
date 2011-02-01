@@ -173,14 +173,25 @@ sub _merge_rev_cond_fields {
 
 sub _copy_cond_fields {
   my ($dest, $fields, $src) = @_;
+  my $src_is_row = blessed($src);
 
   for my $src_f (keys %$fields) {
-    ## FIXME: think of a better error message
-    ## (and no, the one from _resolve_condition is not it)
-    confess("Something went horribly wrong, please send me a test case :), ")
-      unless $src->has_column_loaded($src_f);
+    my $v;
+    if ($src_is_row) {
+      ## FIXME: think of a better error message
+      ## (and no, the one from _resolve_condition is not it)
+      confess(
+        "Something went horribly wrong, please send me a test case :), ")
+        unless $src->has_column_loaded($src_f);
+      $v = $src->get_column($src_f);
+    }
+    else {
+      next unless exists $src->{$src_f};
+      $v = $src->{$src_f};
+    }
+
     ## TODO: what if $dest is a Row object already?
-    $dest->{$fields->{$src_f}} = $src->get_column($src_f);
+    $dest->{$fields->{$src_f}} = $v;
   }
 
   return $dest;

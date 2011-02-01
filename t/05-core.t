@@ -164,19 +164,31 @@ subtest '_merge_cond_fields' => sub {
     {user_id => $user->id},
     'Merged Users email relation cond fields ok'
   );
+
+  cmp_deeply(
+    $mcf->({}, $email_ri, {user_id => 42}),
+    {user_id => 42},
+    'Merged Users email relation cond fields (using hashref as source) ok'
+  );
 };
 
 subtest '_merge_rev_cond_fields' => sub {
   my $mrcf = \&DBICx::Apply::Core::_merge_rev_cond_fields;
 
-  my $user     = $db->resultset('Users')->create({login => 'mr', name => 'Mr'});
-  my $source   = $db->source('Emails');
+  my $user = $db->resultset('Users')->create({login => 'mr', name => 'Mr'});
+  my $source = $db->source('Emails');
   my $user_ri = DBICx::Apply::Core::relationship_info($source, 'user');
 
   cmp_deeply(
     $mrcf->({}, $user_ri, $user),
     {user_id => $user->id},
     'Merged Emails user rev relation cond fields ok'
+  );
+
+  cmp_deeply(
+    $mrcf->({}, $user_ri, {user_id => 42}),
+    {user_id => 42},
+    'Merged Emails user rev relation cond fields (using hashref as source) ok'
   );
 };
 
