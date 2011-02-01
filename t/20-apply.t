@@ -115,24 +115,21 @@ subtest 'Cases with a slave relationship' => sub {
   is($u->name,  'Y', '... name as expected');
 
   ## update - update with incomplete pk
-TODO: {
-    local $TODO = 'user data lacks unique keys; should find from email first';
-    is(
-      exception {
-        $e->apply(
-          { email => 'update_update_incomplete@slaves',
-            user  => {name => 'Z'}
-          }
-        );
-      },
-      undef,
-      'Update email and update user, no exceptions'
-    );
-    is($e->email, 'update_update_incomplete@slaves', '... email as expected');
-    $u = $e->user;
-    is($u->login, 'l', '... login as expected');
-    is($u->name,  'Z', '... name as expected');
-  }
+  is(
+    exception {
+      $e->apply(
+        { email => 'update_update_incomplete@slaves',
+          user  => {name => 'Z'}
+        }
+      );
+    },
+    undef,
+    'Update email and update user, no exceptions'
+  );
+  is($e->email, 'update_update_incomplete@slaves', '... email as expected');
+  $u = $e->user;
+  is($u->login, 'l', '... login as expected');
+  is($u->name,  'Z', '... name as expected');
 };
 
 

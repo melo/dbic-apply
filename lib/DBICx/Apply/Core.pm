@@ -20,7 +20,8 @@ sub apply {
   my $action = $split->{action};
 
   if (my $rels = $split->{slave}) {
-    my $extra_fields = apply_slave_role_relations($source, $rels, $row);
+    my $extra_fields =
+      apply_slave_role_relations($source, $rels, $row, $fields);
     $fields = {%$fields, %$extra_fields};
   }
 
@@ -75,14 +76,26 @@ sub _do_apply_on_row {
 =cut
 
 sub apply_slave_role_relations {
-  my ($source, $rels, $row) = @_;
+  my ($source, $rels, $row, $fields) = @_;
   my %frg_keys;
 
   for (@$rels) {
     my ($name, $data, $info) = @$_;
+    my $rel_source = $source->related_source($name);
 
-    $data = apply($source->related_source($name), $data)
-      unless blessed($data);
+    if (!blessed($data)) {
+      ## Complete keys from slave side in case $data is not enough to
+      ## identify master row
+      my %rel_fields = %$data;
+      for my $src ($fields, $row) {
+        my ($key) = find_unique_cond($rel_source, \%rel_fields);
+        last if $key;
+
+        _merge_cond_fields(\%rel_fields, $info, $src);
+      }
+
+      $data = apply($rel_source, \%rel_fields);
+    }
 
     ## FIXME: $data will be undef if the apply() above deleted this
     ## object. In that case, given that this is a slave relation, we
