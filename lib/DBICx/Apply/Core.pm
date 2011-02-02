@@ -204,7 +204,7 @@ sub _copy_cond_fields {
     }
 
     ## TODO: what if $dest is a Row object already?
-    $dest->{$fields->{$src_f}} = $v;
+    $dest->{$fields->{$src_f}} = $v if defined $v;
   }
 
   return $dest;

@@ -130,6 +130,21 @@ subtest 'Cases with a slave relationship' => sub {
   $u = $e->user;
   is($u->login, 'l', '... login as expected');
   is($u->name,  'Z', '... name as expected');
+
+  ## existing - create master
+  my $warn;
+  is(
+    exception {
+      local $SIG{__WARN__} = sub { $warn .= join(' ', @_) };
+      $e->discard_changes;
+      $e->apply({status => {spam => 'active'}});
+    },
+    undef,
+    'With email, create optional master, no exceptions'
+  );
+  is($warn, undef, 'No warnings either');
+  my $s = $e->status;
+  is($s->spam, 'active', '... spam status as expected');
 };
 
 
