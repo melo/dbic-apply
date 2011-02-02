@@ -23,6 +23,11 @@ __PACKAGE__->add_columns(
     data_type => 'varchar',
     size      => 100,
   },
+
+  'status_id' => {
+    data_type   => 'integer',
+    is_nullable => 1,
+  },
 );
 
 __PACKAGE__->set_primary_key('email_id');
@@ -39,6 +44,12 @@ __PACKAGE__->might_have(
 __PACKAGE__->belongs_to(
   user => 'TestDB::Result::Users',
   {'foreign.user_id' => 'self.user_id'}
+);
+
+__PACKAGE__->belongs_to(
+  status => 'TestDB::Result::Status',
+  {'foreign.status_id' => 'self.status_id'},
+  {cascade_delete      => 'restrict', join_type => 'left'}
 );
 
 
