@@ -28,6 +28,52 @@ subtest 'Simple cases' => sub {
 };
 
 
+subtest 'Force actions' => sub {
+  my $db = TestDB->test_db();
+  my $rs = $db->resultset('Users');
+  my $u1 = $rs->apply({login => 'l1', name => 'L1'});
+  my $u2;
+
+  is(
+    exception {
+      $u2 = $u1->apply({__ACTION => 'CREATE', login => 'l2', name => 'L2'});
+    },
+    undef,
+    'Force create of new user, no exceptions'
+  );
+  is($u2->login, 'l2', '... login as expected');
+  is($u2->name,  'L2', '... name as expected');
+
+  isnt($u1->id, $u2->id, 'Different IDs, forced CREATE');
+
+
+  my $e1 = $u1->add_to_emails({email => 'u1@u1'});
+  is($e1->email,   'u1@u1', 'Email address for U1 ok');
+  is($e1->user_id, $u1->id, '... with the expected user_id');
+
+  is(
+    exception {
+      $e1->apply(
+        { email => 'u3@u3',
+          user  => {__ACTION => 'CREATE', login => 'l3', name => 'L3'}
+        }
+      );
+    },
+    undef,
+    'Force create of new user via email, no exceptions'
+  );
+  $u2 = $e1->user;
+  isnt($u2->id, $u1->id, '... with a new user_id, as expected');
+  is($u2->login, 'l3', '... new login as expected');
+  is($u2->name,  'L3', '... new name as expected');
+
+  $u1->discard_changes;
+  is($u1->emails->count, 0, 'Orginal user no longer has emails');
+
+  $rs->delete;
+};
+
+
 subtest 'Cases with a slave relationship' => sub {
   my $db = TestDB->test_db();
   my $rs = $db->resultset('Emails');

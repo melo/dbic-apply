@@ -29,7 +29,6 @@ sub apply {
   $fields = $target->_dbicx_apply_filter($source, $fields, $row)
     if $target->can('_dbicx_apply_filter');
 
-
   $row = find_one_row($source, $fields) unless $row;
   if ($target->can('_dbicx_apply_impl')) {
     $row = $target->_dbicx_apply_impl($source, $fields, $row, $action,
@@ -59,6 +58,9 @@ sub _do_apply_on_row {
       $row = $source->resultset->create($fields);
     }
   }
+  elsif ($action eq 'CREATE') {
+    $row = $source->resultset->create($fields);
+  }
   elsif ($action eq 'DEL') {
     $row->delete if $row;
     $row = undef;
@@ -84,17 +86,24 @@ sub apply_slave_role_relations {
     my $rel_source = $source->related_source($name);
 
     if (!blessed($data)) {
-      ## Complete keys from slave side in case $data is not enough to
-      ## identify master row
-      my %rel_fields = %$data;
-      for my $src ($fields, $row) {
-        my ($key) = find_unique_cond($rel_source, \%rel_fields);
-        last if $key;
+      my $action = $data->{__ACTION} ||= 'ADD';
 
-        _merge_cond_fields(\%rel_fields, $info, $src);
+      my %rel_fields = %$data;
+      if ($action ne 'CREATE') {
+        ## Complete keys from slave side in case $data is not enough to
+        ## identify master row
+        for my $src ($fields, $row) {
+          my ($key) = find_unique_cond($rel_source, \%rel_fields);
+          last if $key;
+
+          _merge_cond_fields(\%rel_fields, $info, $src);
+        }
       }
 
       $data = apply($rel_source, \%rel_fields);
+    }
+    else {
+      ## FIXME: is this case possible?
     }
 
     ## FIXME: $data will be undef if the apply() above deleted this
