@@ -18,57 +18,50 @@ sub apply {
 # Hook the current DBIC relationship helpers
 
 sub has_one {
-  my ($self, $name, @rest) = @_;
+  my $self = shift;
 
-  DBICx::Apply::Core::set_relationship_info($self, $name,
-    {our_role => 'master'},
-  );
-
-  return $self->next::method($name, @rest);
+  return $self->_simple_rel($self->next::can, 'master', @_);
 }
 
 sub belongs_to {
-  my ($self, $name, @rest) = @_;
+  my $self = shift;
 
-  DBICx::Apply::Core::set_relationship_info($self, $name,
-    {our_role => 'slave'},
-  );
-
-  return $self->next::method($name, @rest);
+  return $self->_simple_rel($self->next::can, 'slave', @_);
 }
 
 sub might_have {
-  my ($self, $name, @rest) = @_;
+  my $self = shift;
 
-  DBICx::Apply::Core::set_relationship_info($self, $name,
-    {our_role => 'master'},
-  );
-
-  return $self->next::method($name, @rest);
+  return $self->_simple_rel($self->next::can, 'master', @_);
 }
 
 sub has_many {
-  my ($self, $name, @rest) = @_;
+  my $self = shift;
 
-  DBICx::Apply::Core::set_relationship_info($self, $name,
-    {our_role => 'master'},
-  );
-
-  return $self->next::method($name, @rest);
+  return $self->_simple_rel($self->next::can, 'master', @_);
 }
 
 sub many_to_many {
-  my ($self, $name, $l_rel, $f_rel, @rest) = @_;
+  my ($self, $n, $l_rel, $f_rel, @rest) = @_;
 
   DBICx::Apply::Core::set_relationship_info(
-    $self, $name,
+    $self, $n,
     { our_role      => 'via',
       link_name     => $l_rel,
       link_frg_name => $f_rel,
     },
   );
 
-  return $self->next::method($name, $l_rel, $f_rel, @rest);
+  return $self->next::method($n, $l_rel, $f_rel, @rest);
 }
+
+sub _simple_rel {
+  my ($self, $nm, $role, $n, @rest) = @_;
+
+  DBICx::Apply::Core::set_relationship_info($self, $n, {our_role => $role});
+
+  return $nm->($self, $n, @rest);
+}
+
 
 1;
