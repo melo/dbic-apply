@@ -38,9 +38,15 @@ sub apply {
     $row = _do_apply_on_row($source, $fields, $row, $action);
   }
 
-  my $rels = $split->{master};
-  if ($row && $rels) {
-    apply_master_role_relations($source, $rels, $row);
+  if ($row) {
+    my $rels;
+    if ($rels = $split->{master}) {
+      apply_master_role_relations($source, $rels, $row);
+    }
+    if ($rels = $split->{fake_master}) {
+      my $frgn_keys = apply_fake_master_role_relations($source, $rels, $row);
+      $row->update($frgn_keys) if $frgn_keys && %$frgn_keys;
+    }
   }
 
   return $row;
@@ -168,6 +174,39 @@ sub apply_master_role_relations {
 }
 
 
+=function apply_fake_master_role_relations
+=cut
+
+sub apply_fake_master_role_relations {
+  my ($source, $rels, $row) = @_;
+  my %frg_keys;
+
+  for (@$rels) {
+    my ($name, $data, $info, $rev_info) = @$_;
+    my $rel_source = $source->related_source($name);
+
+    if (!blessed($data)) {
+      my $action = $data->{__ACTION} ||= 'ADD';
+
+      my %rel_fields = %$data;
+      _merge_cond_fields(\%rel_fields, $rev_info, $row);
+
+      $data = apply($rel_source, \%rel_fields);
+    }
+    else {
+      ## FIXME: is this case possible?
+    }
+
+    _merge_rev_cond_fields(\%frg_keys, $info, $data) if $data;
+
+    ### DIRTY HACK: no public API to clear this caches
+    delete $row->{_relationship_data}{$name} if $row;
+  }
+
+  return \%frg_keys;
+}
+
+
 =private _merge_cond_fields
 =cut
 
@@ -200,11 +239,12 @@ sub _copy_cond_fields {
   for my $src_f (keys %$fields) {
     my $v;
     if ($src_is_row) {
+      my $sn = $src->result_source->source_name;
       ## FIXME: think of a better error message
       ## (and no, the one from _resolve_condition is not it)
       confess(
-        "Something went horribly wrong, please send me a test case :), ")
-        unless $src->has_column_loaded($src_f);
+        "Something went horribly wrong, please send me a test case :): field '$src_f' for source '$sn', "
+      ) unless $src->has_column_loaded($src_f);
       $v = $src->get_column($src_f);
     }
     else {
@@ -299,6 +339,7 @@ sub parse_data {
     $v = [$v] unless $role eq 'slave' or ref($v) eq 'ARRAY';
 
     ## Convert many_to_many into a has_many
+    my $rev_info;
     if ($role eq 'via') {
       my $r = $info->{link_frg_name};
 
@@ -312,8 +353,12 @@ sub parse_data {
       $f    = $info->{link_name};
       $info = relationship_info($source, $f);
     }
+    elsif (exists $info->{attrs}{master_rel}) {
+      $role = 'fake_master';
+      $rev_info = relationship_info($source, $info->{attrs}{master_rel});
+    }
 
-    push @{$splited{$role}}, [$f, $v, $info];
+    push @{$splited{$role}}, [$f, $v, $info, $rev_info];
   }
 
   return \%splited;

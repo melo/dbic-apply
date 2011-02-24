@@ -191,6 +191,26 @@ subtest 'Cases with a slave relationship' => sub {
   is($warn, undef, 'No warnings either');
   my $s = $e->status;
   is($s->spam, 'active', '... spam status as expected');
+
+  ## create - create (via reverse belongs_to)
+  $rs = $db->resultset('Users');
+  is(
+    exception {
+      $u = $rs->apply(
+        { login        => 'l9',
+          name         => 'L9',
+          active_email => {email => 'create_create_l9@slaves'},
+        }
+      );
+    },
+    undef,
+    'Create user with active email, no exceptions'
+  );
+  is($u->login,         'l9', '... login as expected');
+  is($u->name,          'L9', '... name as expected');
+  is($u->emails->count, 1,    '... user has 1 emails now');
+  $e = $u->active_email;
+  is($e->email, 'create_create_l9@slaves', '... email as expected');
 };
 
 

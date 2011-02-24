@@ -53,7 +53,11 @@ __PACKAGE__->belongs_to(
   active_email => 'TestDB::Result::Emails',
   { 'foreign.email_id' => 'self.active_email_id',
     'foreign.user_id'  => 'self.user_id'
-  }
+  },
+  { on_delete  => 'set null',
+    join_type  => 'left',
+    master_rel => 'emails',
+  },
 );
 
 

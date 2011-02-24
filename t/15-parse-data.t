@@ -37,6 +37,7 @@ cmp_deeply(
       emails        => {email => 'me@world.domination.org'},
       tags_per_user => [{tag => {tag => 'love'}}],
       tags          => [{tag => 'nice'}, {tag => 'word', __ACTION => 'IGN'}],
+      active_email => {email => 'his@world.domination.org'},
     }
   ),
   { action => 'ADD',
@@ -45,18 +46,30 @@ cmp_deeply(
       login => 'my login',
     },
     master => bag(
-      ['emails', [{email => 'me@world.domination.org'}], ignore()],
+      ['emails', [{email => 'me@world.domination.org'}], ignore(), undef],
       [ 'tags_per_user',
         [ {tag => {tag => 'nice'}},
           {__ACTION => 'IGN', tag => {tag => 'word'}}
         ],
         superhashof({source => 'TestDB::Result::UsersTags'}),
+        undef,
       ],
       [ 'tags_per_user',
         [{tag => {tag => 'love'}}],
-        superhashof({source => 'TestDB::Result::UsersTags'}),
-      ]
+        superhashof({source => 'TestDB::Result::UsersTags'}), undef,
+      ],
     ),
+    fake_master => [
+      [ 'active_email',
+        {email => 'his@world.domination.org'},
+        superhashof(
+          { source => 'TestDB::Result::Emails',
+            attrs  => superhashof({master_rel => 'emails'}),
+          }
+        ),
+        superhashof({source => 'TestDB::Result::Emails',}),
+      ],
+    ],
   },
   'Parsed sample data for Users ok'
 );
@@ -70,7 +83,7 @@ cmp_deeply(
     }
   ),
   { fields => {email => 'mini_me@here'},
-    slave  => [['user', {login => 'xpto'}, ignore()]],
+    slave  => [['user', {login => 'xpto'}, ignore(), undef]],
     action => 'DEL',
   },
   'Parsed sample data for Emails ok'
