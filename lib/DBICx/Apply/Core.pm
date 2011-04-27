@@ -242,9 +242,12 @@ sub _copy_cond_fields {
       my $sn = $src->result_source->source_name;
       ## FIXME: think of a better error message
       ## (and no, the one from _resolve_condition is not it)
-      confess(
-        "Something went horribly wrong, please send me a test case :): field '$src_f' for source '$sn', "
-      ) unless $src->has_column_loaded($src_f);
+      $src->discard_changes unless $src->has_column_loaded($src_f);
+
+# confess(
+#   "Something went horribly wrong, please send me a test case :): field '$src_f' for source '$sn', "
+# ) unless $src->has_column_loaded($src_f);
+
       $v = $src->get_column($src_f);
     }
     else {
